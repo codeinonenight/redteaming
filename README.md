@@ -23,5 +23,5 @@ npm run dev
 1. 把本目录上传到 GitHub。
 2. 在 Vercel 新建项目并选择这个仓库。
 3. Framework Preset 选 `Other`。
-4. Build Command 可留空；如果 Vercel 要求填写，使用 `npm run build`。
-5. Output Directory 留空；若使用 build，则填 `dist`。
+4. Build Command 使用 `npm run build`。
+5. Output Directory 使用 `public`。

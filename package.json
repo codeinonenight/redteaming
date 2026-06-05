@@ -5,6 +5,6 @@
   "scripts": {
     "dev": "python3 -m http.server 3000",
     "start": "python3 -m http.server 3000",
-    "build": "mkdir -p dist && cp -R index.html pages vercel.json dist/"
+    "build": "mkdir -p public && cp -R index.html pages public/"
   }
 }
