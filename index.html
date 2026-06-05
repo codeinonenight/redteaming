@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>模型红队评测合集</title>
+  <meta name="description" content="模型红队、动态评测与 Arena 报告合集">
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #090b10;
+      --surface: #111722;
+      --surface-2: #171f2d;
+      --line: #2a3444;
+      --text: #eef3fb;
+      --muted: #93a3b8;
+      --accent: #58a6ff;
+      --accent-2: #46d9a6;
+      --accent-3: #f1b84b;
+      --danger: #ff6b7a;
+      --shadow: rgba(0, 0, 0, .38);
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      overflow: hidden;
+    }
+
+    body {
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+
+    .topbar {
+      position: relative;
+      z-index: 10;
+      display: grid;
+      grid-template-columns: minmax(180px, auto) minmax(0, 1fr);
+      align-items: center;
+      gap: 16px;
+      min-height: 66px;
+      padding: 10px 18px;
+      background: rgba(13, 17, 24, .96);
+      border-bottom: 1px solid var(--line);
+      box-shadow: 0 10px 30px -24px var(--shadow);
+      backdrop-filter: blur(14px);
+    }
+
+    .brand {
+      min-width: 0;
+    }
+
+    .brand-title {
+      margin: 0;
+      font-size: 17px;
+      font-weight: 760;
+      line-height: 1.25;
+      white-space: nowrap;
+    }
+
+    .brand-sub {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.2;
+      white-space: nowrap;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      min-width: 0;
+      overflow-x: auto;
+      padding: 3px;
+      scrollbar-width: thin;
+      scrollbar-color: #3a4658 transparent;
+    }
+
+    .tab {
+      --tab-accent: var(--accent);
+      flex: 0 0 auto;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 38px;
+      padding: 8px 12px;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--muted);
+      font: inherit;
+      font-size: 13px;
+      font-weight: 650;
+      letter-spacing: 0;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: background .16s ease, border-color .16s ease, color .16s ease, transform .16s ease;
+    }
+
+    .tab:hover {
+      background: var(--surface);
+      color: var(--text);
+      border-color: var(--line);
+    }
+
+    .tab[aria-selected="true"] {
+      background: linear-gradient(180deg, color-mix(in srgb, var(--tab-accent) 22%, var(--surface)), var(--surface-2));
+      color: var(--text);
+      border-color: color-mix(in srgb, var(--tab-accent) 48%, var(--line));
+      box-shadow: inset 0 -2px 0 var(--tab-accent);
+    }
+
+    .frame-wrap {
+      min-height: 0;
+      background:
+        linear-gradient(90deg, rgba(88, 166, 255, .05), rgba(70, 217, 166, .04), rgba(241, 184, 75, .04)),
+        var(--bg);
+    }
+
+    iframe {
+      display: block;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      background: #0d1117;
+    }
+
+    .fallback {
+      position: absolute;
+      inset: 66px 0 0;
+      display: none;
+      place-items: center;
+      padding: 20px;
+      color: var(--muted);
+      background: var(--bg);
+    }
+
+    .fallback a {
+      color: var(--accent);
+    }
+
+    @media (max-width: 820px) {
+      .topbar {
+        grid-template-columns: 1fr;
+        gap: 8px;
+        padding: 9px 10px;
+      }
+
+      .brand {
+        padding: 0 2px;
+      }
+
+      .brand-title {
+        font-size: 15px;
+      }
+
+      .brand-sub {
+        display: none;
+      }
+
+      .tabs {
+        gap: 6px;
+        padding-bottom: 5px;
+      }
+
+      .tab {
+        min-height: 34px;
+        padding: 7px 10px;
+        font-size: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand" aria-label="项目">
+      <h1 class="brand-title" id="pageTitle">模型红队评测合集</h1>
+      <div class="brand-sub" id="pageDesc">价值取向、对齐压测、动态评测与豆包红蓝对抗</div>
+    </div>
+    <nav class="tabs" aria-label="报告导航" id="tabs"></nav>
+  </header>
+
+  <main class="frame-wrap">
+    <iframe id="reportFrame" title="价值审问" src="pages/interrogation.html"></iframe>
+    <div class="fallback" id="fallback">
+      页面没有加载成功。<a id="openDirect" href="pages/interrogation.html">直接打开当前报告</a>
+    </div>
+  </main>
+
+  <script>
+    const reports = [
+      {
+        id: "interrogation",
+        label: "价值审问",
+        title: "价值审问",
+        desc: "个人利益 vs 集体利益",
+        file: "pages/interrogation.html",
+        accent: "#58a6ff"
+      },
+      {
+        id: "ai-love-arena",
+        label: "恋爱陪伴 Arena",
+        title: "恋爱陪伴 Arena",
+        desc: "和 AI 谈恋爱该不该鼓励",
+        file: "pages/ai-love-arena.html",
+        accent: "#ff6b7a"
+      },
+      {
+        id: "season-1-bo5",
+        label: "S1 全景 BO5/WO5",
+        title: "S1 全景 BO5/WO5",
+        desc: "8 topics x 5 rolls 动态评测",
+        file: "pages/season-1-bo5.html",
+        accent: "#46d9a6"
+      },
+      {
+        id: "r1-sycophancy",
+        label: "R1 不谄媚",
+        title: "R1 不谄媚",
+        desc: "错误前提、情绪施压与道德绑架",
+        file: "pages/r1-sycophancy.html",
+        accent: "#f1b84b"
+      },
+      {
+        id: "doubao-redteam",
+        label: "豆包红蓝看板",
+        title: "豆包红蓝看板",
+        desc: "豆包真实线上链路红蓝对抗评测",
+        file: "pages/doubao-redteam.html",
+        accent: "#9b72f2"
+      }
+    ];
+
+    const tabsEl = document.getElementById("tabs");
+    const frameEl = document.getElementById("reportFrame");
+    const titleEl = document.getElementById("pageTitle");
+    const descEl = document.getElementById("pageDesc");
+    const directEl = document.getElementById("openDirect");
+    const fallbackEl = document.getElementById("fallback");
+
+    function getRequestedId() {
+      const params = new URLSearchParams(window.location.search);
+      const queryView = params.get("view");
+      const hashView = window.location.hash.replace(/^#/, "");
+      return queryView || hashView || reports[0].id;
+    }
+
+    function setUrl(id) {
+      const url = new URL(window.location.href);
+      url.searchParams.set("view", id);
+      url.hash = "";
+      window.history.replaceState({ view: id }, "", url);
+    }
+
+    function selectReport(id, updateUrl = true) {
+      const report = reports.find((item) => item.id === id) || reports[0];
+      titleEl.textContent = report.title;
+      descEl.textContent = report.desc;
+      frameEl.title = report.title;
+      directEl.href = report.file;
+      fallbackEl.style.display = "none";
+
+      if (frameEl.getAttribute("src") !== report.file) {
+        frameEl.src = report.file;
+      }
+
+      document.querySelectorAll(".tab").forEach((button) => {
+        const isActive = button.dataset.view === report.id;
+        button.setAttribute("aria-selected", String(isActive));
+        button.tabIndex = isActive ? 0 : -1;
+      });
+
+      if (updateUrl) {
+        setUrl(report.id);
+      }
+    }
+
+    reports.forEach((report) => {
+      const button = document.createElement("button");
+      button.className = "tab";
+      button.type = "button";
+      button.dataset.view = report.id;
+      button.textContent = report.label;
+      button.style.setProperty("--tab-accent", report.accent);
+      button.setAttribute("role", "tab");
+      button.setAttribute("aria-selected", "false");
+      button.addEventListener("click", () => selectReport(report.id));
+      tabsEl.appendChild(button);
+    });
+
+    tabsEl.addEventListener("keydown", (event) => {
+      if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) {
+        return;
+      }
+
+      event.preventDefault();
+      const current = reports.findIndex((report) => report.id === getRequestedId());
+      let next = current < 0 ? 0 : current;
+      if (event.key === "ArrowRight") next = (next + 1) % reports.length;
+      if (event.key === "ArrowLeft") next = (next - 1 + reports.length) % reports.length;
+      if (event.key === "Home") next = 0;
+      if (event.key === "End") next = reports.length - 1;
+      selectReport(reports[next].id);
+      document.querySelector(`[data-view="${reports[next].id}"]`).focus();
+    });
+
+    frameEl.addEventListener("error", () => {
+      fallbackEl.style.display = "grid";
+    });
+
+    window.addEventListener("popstate", () => selectReport(getRequestedId(), false));
+    selectReport(getRequestedId());
+  </script>
+</body>
+</html>
